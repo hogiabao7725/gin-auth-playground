@@ -17,15 +17,6 @@ func New(code, message string, statusCode int) *AppError {
 	return &AppError{Code: code, Message: message, StatusCode: statusCode}
 }
 
-func (e *AppError) WithMessagef(format string, args ...any) *AppError {
-	return &AppError{
-		Code:       e.Code,
-		Message:    fmt.Sprintf(format, args...),
-		StatusCode: e.StatusCode,
-		Cause:      e.Cause,
-	}
-}
-
 func Wrap(err error, code, message string, statusCode int) *AppError {
 	return &AppError{
 		Code:       code,
@@ -35,19 +26,37 @@ func Wrap(err error, code, message string, statusCode int) *AppError {
 	}
 }
 
+func (e *AppError) WithMessagef(format string, args ...any) *AppError {
+	return &AppError{
+		Code:       e.Code,
+		Message:    fmt.Sprintf(format, args...),
+		StatusCode: e.StatusCode,
+		Cause:      e.Cause,
+	}
+}
+
 var (
-	// Auth and user
+	// Generic server errors
+	ErrInternalServer = New("INTERNAL_SERVER_ERROR", "Server has encountered an error, please try again later", 500)
+
+	// Package-level technical errors
+	ErrComparePasswordFailed = New("COMPARE_PASSWORD_FAILED", "Failed to compare password", 500)
+	ErrHashFailed            = New("HASH_FAILED", "Failed to hash password", 500)
+
+	// Input and validation errors
+	ErrInvalidDate       = New("INVALID_DATE", "Invalid date value", 400)
+	ErrInvalidTokenInput = New("INVALID_TOKEN_INPUT", "Invalid token input", 400)
+	ErrPasswordEmpty     = New("PASSWORD_EMPTY", "Password cannot be empty", 400)
+
+	// Authorization and identity
+	ErrCannotDemoteAdmin   = New("CANNOT_DEMOTE_ADMIN", "Cannot change role of another admin", 400)
 	ErrEmailTaken          = New("EMAIL_TAKEN", "Email already registered", 409)
+	ErrForbidden           = New("FORBIDDEN", "Access denied", 403)
 	ErrInvalidCredentials  = New("INVALID_CREDENTIALS", "Invalid email or password", 401)
 	ErrInvalidRefreshToken = New("INVALID_REFRESH_TOKEN", "Refresh token is invalid or expired", 401)
-	ErrCannotDemoteAdmin   = New("CANNOT_DEMOTE_ADMIN", "Cannot change role of another admin", 400)
 
-	// Common
-	ErrNotFound    = New("NOT_FOUND", "Resource not found", 404)
-	ErrForbidden   = New("FORBIDDEN", "Access denied", 403)
-	ErrInvalidDate = New("INVALID_DATE", "Invalid date value", 400)
-
-	// Booking and tickets
+	// Domain and business rules
+	ErrNotFound                = New("NOT_FOUND", "Resource not found", 404)
 	ErrInsufficientTickets     = New("INSUFFICIENT_TICKETS", "Not enough tickets available", 400)
 	ErrEventNotOnSale          = New("EVENT_NOT_ON_SALE", "This event is no longer on sale", 400)
 	ErrExceedsMaxPerBooking    = New("EXCEEDS_MAX_PER_BOOKING", "Exceeds maximum tickets per booking", 400)
