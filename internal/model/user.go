@@ -2,7 +2,6 @@ package model
 
 import (
 	"context"
-	"errors"
 	"time"
 
 	"github.com/google/uuid"
@@ -24,10 +23,6 @@ type CreateUserParams struct {
 	Password string
 	Role     string
 }
-
-var (
-	ErrEmailTaken = errors.New("email already taken")
-)
 
 type UserRepository interface {
 	Create(ctx context.Context, params CreateUserParams) (*User, error)

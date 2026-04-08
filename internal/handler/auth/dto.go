@@ -1,16 +1,41 @@
 package auth
 
 import (
+	"net/mail"
+	"strings"
 	"time"
+
+	"github.com/hogiabao7725/go-ticket-engine/internal/response"
 )
 
 // ===== REQUEST DTOs =====
 
 type RegisterRequest struct {
-	Name                 string `json:"name" binding:"required,min=2,max=100"`
-	Email                string `json:"email" binding:"required,email"`
-	Password             string `json:"password" binding:"required,min=6"`
-	PasswordConfirmation string `json:"password_confirmation" binding:"required,eqfield=Password"`
+	Name     string `json:"name"`
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
+func (req *RegisterRequest) Validate() []response.ValidationDetail {
+	var errs []response.ValidationDetail
+
+	if strings.TrimSpace(req.Name) == "" {
+		errs = append(errs, response.ValidationDetail{Field: "Name", Reason: "This field is required"})
+	} else if len(req.Name) < 2 {
+		errs = append(errs, response.ValidationDetail{Field: "Name", Reason: "Must be at least 2 characters"})
+	}
+
+	if strings.TrimSpace(req.Email) == "" {
+		errs = append(errs, response.ValidationDetail{Field: "Email", Reason: "This field is required"})
+	} else if _, err := mail.ParseAddress(req.Email); err != nil {
+		errs = append(errs, response.ValidationDetail{Field: "Email", Reason: "Invalid email format"})
+	}
+
+	if len(req.Password) < 6 {
+		errs = append(errs, response.ValidationDetail{Field: "Password", Reason: "Must be at least 6 characters"})
+	}
+
+	return errs
 }
 
 // ===== RESPONSE DTOs =====

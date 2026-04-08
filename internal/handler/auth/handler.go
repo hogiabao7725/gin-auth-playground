@@ -2,13 +2,12 @@ package auth
 
 import (
 	"context"
-	"errors"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"github.com/hogiabao7725/go-ticket-engine/internal/apperror"
 	"github.com/hogiabao7725/go-ticket-engine/internal/model"
-	"github.com/hogiabao7725/go-ticket-engine/pkg/apperror"
-	"github.com/hogiabao7725/go-ticket-engine/pkg/response"
+	"github.com/hogiabao7725/go-ticket-engine/internal/response"
 )
 
 type Service interface {
@@ -18,27 +17,29 @@ type Service interface {
 	UpdateRole(ctx context.Context, id uuid.UUID, role string) error
 }
 
-type UserHandler struct {
+type AuthHandler struct {
 	service Service
 }
 
-func NewUserHandler(service Service) *UserHandler {
-	return &UserHandler{
+func NewAuthHandler(service Service) *AuthHandler {
+	return &AuthHandler{
 		service: service,
 	}
 }
 
-func (h *UserHandler) Register(c *gin.Context) {
+func (h *AuthHandler) Register(c *gin.Context) {
 	var req RegisterRequest
 
-	// 1. Bind JSON request - Check for errors
+	// 1. Bind JSON request (check valid json syntax)
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.Error(c, apperror.Wrap(
-			err,
-			apperror.ErrInvalidInput.Code,
-			apperror.ErrInvalidInput.Message,
-			apperror.ErrInvalidInput.StatusCode,
-		))
+		response.Error(c, apperror.New(apperror.CodeInvalidInput, "Invalid JSON format"))
+		return
+	}
+
+	// 2. Custom validation
+	if errs := req.Validate(); len(errs) > 0 {
+		appErr := apperror.New(apperror.CodeInvalidInput, "Invalid input data").WithDetails(errs)
+		response.Error(c, appErr)
 		return
 	}
 
@@ -53,11 +54,6 @@ func (h *UserHandler) Register(c *gin.Context) {
 	// 3. Call service layer
 	user, err := h.service.Create(c.Request.Context(), arg)
 	if err != nil {
-		if errors.Is(err, model.ErrEmailTaken) {
-			response.Error(c, apperror.ErrEmailTaken)
-			return
-		}
-
 		response.Error(c, err)
 		return
 	}
@@ -69,5 +65,4 @@ func (h *UserHandler) Register(c *gin.Context) {
 		Role:      user.Role,
 		CreatedAt: user.CreatedAt,
 	})
-
 }
