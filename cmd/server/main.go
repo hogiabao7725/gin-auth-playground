@@ -11,8 +11,10 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/hogiabao7725/go-ticket-engine/internal/config"
 	"github.com/hogiabao7725/go-ticket-engine/internal/database"
-	"github.com/hogiabao7725/go-ticket-engine/internal/handler"
-	"github.com/hogiabao7725/go-ticket-engine/internal/routes"
+	"github.com/hogiabao7725/go-ticket-engine/internal/handler/auth"
+	"github.com/hogiabao7725/go-ticket-engine/internal/handler/health"
+	userRepo "github.com/hogiabao7725/go-ticket-engine/internal/repository/user"
+	"github.com/hogiabao7725/go-ticket-engine/internal/service"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 )
@@ -48,13 +50,25 @@ func main() {
 	}()
 	log.Info().Msg("successfully connected to redis")
 
+	// 1. Setup Repositories
+	userRepository := userRepo.NewUserRepository(pgPool)
+
+	// 2. Setup Services
+	userService := service.NewUserService(userRepository)
+
 	// set up router and start server
 	router := gin.New()
 	router.Use(gin.Recovery())
 
-	routes.SetupRoutes(router, routes.Handlers{
-		Health: handler.NewHealthHandler(),
-	})
+	// core api group
+	v1 := router.Group("/api/v1")
+
+	// 3. Mount Handlers
+	healthHandler := health.NewHealthHandler()
+	healthHandler.RegisterRoutes(v1)
+
+	authHandler := auth.NewAuthHandler(userService)
+	authHandler.RegisterRoutes(v1)
 
 	addr := fmt.Sprintf(":%s", cfg.Server.Port)
 	server := &http.Server{
