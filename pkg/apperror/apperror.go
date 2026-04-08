@@ -44,6 +44,7 @@ var (
 	ErrHashFailed            = New("HASH_FAILED", "Failed to hash password", 500)
 
 	// Input and validation errors
+	ErrInvalidInput      = New("INVALID_INPUT", "Invalid input data", 400)
 	ErrInvalidDate       = New("INVALID_DATE", "Invalid date value", 400)
 	ErrInvalidTokenInput = New("INVALID_TOKEN_INPUT", "Invalid token input", 400)
 	ErrPasswordEmpty     = New("PASSWORD_EMPTY", "Password cannot be empty", 400)
