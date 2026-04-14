@@ -14,7 +14,6 @@ var (
 )
 
 func HashPassword(password string) (string, error) {
-
 	valPassword, err := validatePassword(password)
 	if err != nil {
 		return "", err
