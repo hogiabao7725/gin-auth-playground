@@ -1,14 +1,25 @@
 package domain
 
-import (
-	"errors"
-)
+import "errors"
 
 var (
-	ErrUserAlreadyExists  = errors.New("user with this email already exists")
-	ErrUserNotFound       = errors.New("user not found")
-	ErrInvalidName        = errors.New("invalid name (must not be empty)")
-	ErrWeakPassword       = errors.New("password too weak (min 6 characters)")
-	ErrInvalidEmail       = errors.New("invalid email format")
-	ErrInvalidCredentials = errors.New("invalid email or password")
+	// ID
+	ErrEmptyID = errors.New("id cannot be empty")
+
+	// Name
+	ErrEmptyName = errors.New("name cannot be empty")
+
+	// Email
+	ErrEmptyEmail   = errors.New("email cannot be empty")
+	ErrInvalidEmail = errors.New("invalid email format")
+
+	// Password
+	ErrEmptyPassword = errors.New("password cannot be empty")
+	ErrWeakPassword  = errors.New("password is too weak")
+
+	// Role
+	ErrInvalidRole = errors.New("invalid role")
+
+	// User
+	ErrUserAlreadyExists = errors.New("user with this email already exists")
 )
