@@ -2,6 +2,8 @@ package register
 
 import (
 	"context"
+	"errors"
+	"fmt"
 
 	"github.com/hogiabao7725/go-ticket-engine/internal/modules/auth/domain"
 )
@@ -51,7 +53,10 @@ func (h *Handler) Execute(ctx context.Context, cmd Command) (*domain.User, error
 	}
 
 	if err := h.userRepo.Create(ctx, user); err != nil {
-		return nil, err
+		if errors.Is(err, domain.ErrUserAlreadyExists) {
+			return nil, err
+		}
+		return nil, fmt.Errorf("auth.features.register.handler.Execute: %w", err)
 	}
 
 	return user, nil

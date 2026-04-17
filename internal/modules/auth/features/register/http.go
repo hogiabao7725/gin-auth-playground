@@ -47,7 +47,7 @@ func (h *HTTPHandler) Register(c *gin.Context) {
 		status, msg := authHttp.MapDomainErrorToHTTP(err)
 		coreHttp.Error(c, status, msg)
 		return
-	}	
+	}
 
 	resp := RegisterResponse{
 		ID:        user.ID(),
