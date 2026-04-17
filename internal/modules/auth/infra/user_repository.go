@@ -7,6 +7,7 @@ import (
 
 	"github.com/hogiabao7725/go-ticket-engine/internal/infra/sqlc"
 	"github.com/hogiabao7725/go-ticket-engine/internal/modules/auth/domain"
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
 )
 
@@ -39,11 +40,18 @@ func (r *UserRepository) Create(ctx context.Context, user *domain.User) error {
 				return domain.ErrUserAlreadyExists
 			}
 		}
-		return fmt.Errorf("infra.user_repo.Create: %w", err)
+		return fmt.Errorf("auth.infra.user_repo.Create: %w", err)
 	}
 	return nil
 }
 
 func (r *UserRepository) FindByEmail(ctx context.Context, email string) (*domain.User, error) {
-	return nil, nil
+	dbUser, err := r.queries.GetUserByEmail(ctx, email)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, domain.ErrUserNotFound
+		}
+		return nil, fmt.Errorf("auth.infra.user_repo.FindByEmail: %w", err)
+	}
+	return toDomainUser(&dbUser), nil
 }
