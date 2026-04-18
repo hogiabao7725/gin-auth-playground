@@ -5,6 +5,8 @@ import (
 	"github.com/hogiabao7725/go-ticket-engine/internal/core/config"
 	"github.com/hogiabao7725/go-ticket-engine/internal/infra/sqlc"
 	infraToken "github.com/hogiabao7725/go-ticket-engine/internal/infra/token"
+	"github.com/hogiabao7725/go-ticket-engine/internal/core/middleware"
+	"github.com/hogiabao7725/go-ticket-engine/internal/modules/auth/features/get_me"
 	"github.com/hogiabao7725/go-ticket-engine/internal/modules/auth/features/login"
 	"github.com/hogiabao7725/go-ticket-engine/internal/modules/auth/features/register"
 	"github.com/hogiabao7725/go-ticket-engine/internal/modules/auth/infra"
@@ -18,21 +20,29 @@ func RegisterRoutes(r *gin.RouterGroup, dbPool *pgxpool.Pool, jwtCfg config.JWTC
 	userRepo := infra.NewUserRepository(queries)
 	passHasher := infra.NewBcryptHasher()
 	idGen := infra.NewUUIDGenerator()
-	tokenGenerator := infra.NewJWTTokenGenerator(
-		infraToken.NewJWT(jwtCfg.AccessSecret, jwtCfg.RefreshSecret, jwtCfg.AccessTTL, jwtCfg.RefreshTTL),
-	)
+	jwtEngine := infraToken.NewJWT(jwtCfg.AccessSecret, jwtCfg.RefreshSecret, jwtCfg.AccessTTL, jwtCfg.RefreshTTL)
+	tokenGenerator := infra.NewJWTTokenGenerator(jwtEngine)
+	authMiddleware := middleware.NewAuthMiddleware(jwtEngine)
 
 	// Use case handlers
 	registerHandler := register.NewHandler(userRepo, passHasher, idGen)
 	loginHandler := login.NewHandler(userRepo, passHasher, tokenGenerator)
+	getMeHandler := get_me.NewHandler(userRepo)
 
 	// HTTP handlers
 	registerHTTPHandler := register.NewHTTPHandler(registerHandler)
 	loginHTTPHandler := login.NewHTTPHandler(loginHandler)
+	getMeHTTPHandler := get_me.NewHTTPHandler(getMeHandler)
 
 	authGroup := r.Group("/auth")
 	{
 		authGroup.POST("/register", registerHTTPHandler.Register)
 		authGroup.POST("/login", loginHTTPHandler.Login)
+		
+		protected := authGroup.Group("/")
+		protected.Use(authMiddleware.RequireAuth())
+		{
+			protected.GET("/me", getMeHTTPHandler.GetMe)
+		}
 	}
 }

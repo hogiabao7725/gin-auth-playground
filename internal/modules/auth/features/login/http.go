@@ -1,12 +1,10 @@
 package login
 
 import (
-	"errors"
-
 	"github.com/gin-gonic/gin"
 
 	coreHttp "github.com/hogiabao7725/go-ticket-engine/internal/core/delivery/http"
-	"github.com/hogiabao7725/go-ticket-engine/internal/modules/auth/domain"
+	authHttp "github.com/hogiabao7725/go-ticket-engine/internal/modules/auth/delivery/http"
 )
 
 type LoginRequest struct {
@@ -48,13 +46,8 @@ func (h *HTTPHandler) Login(c *gin.Context) {
 
 	result, err := h.loginHandler.Execute(c.Request.Context(), cmd)
 	if err != nil {
-		if errors.Is(err, domain.ErrInvalidCredentials) {
-			coreHttp.Unauthorized(c, "invalid email or password")
-			return
-		}
-
-		// c.Error(err) // for logging
-		coreHttp.Error(c, 500, "internal server error")
+		status, msg := authHttp.MapDomainErrorToHTTP(err)
+		coreHttp.Error(c, status, msg)
 		return
 	}
 
