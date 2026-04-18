@@ -7,3 +7,9 @@ SELECT id, name, email, password, role, created_at, updated_at
 FROM users
 WHERE lower(btrim(email)) = lower(btrim($1))
 LIMIT 1;
+
+-- name: GetUserByID :one
+SELECT id, name, email, password, role, created_at, updated_at
+FROM users
+WHERE id = $1
+LIMIT 1;

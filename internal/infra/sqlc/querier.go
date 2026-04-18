@@ -15,6 +15,7 @@ type Querier interface {
 	DeleteRefreshTokensByUserID(ctx context.Context, userID string) error
 	GetRefreshTokenByHash(ctx context.Context, tokenHash string) (GetRefreshTokenByHashRow, error)
 	GetUserByEmail(ctx context.Context, btrim string) (User, error)
+	GetUserByID(ctx context.Context, id string) (User, error)
 }
 
 var _ Querier = (*Queries)(nil)
