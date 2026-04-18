@@ -59,3 +59,7 @@ func NotFound(c *gin.Context, message string) {
 	}
 	Error(c, http.StatusNotFound, message)
 }
+
+func AbortWithError(c *gin.Context, status int, message string) {
+	c.AbortWithStatusJSON(status, errorResponse{Message: message})
+}
