@@ -2,19 +2,21 @@ package domain
 
 import (
 	"time"
+
+	"github.com/hogiabao7725/go-ticket-engine/internal/modules/auth/domain/uservo"
 )
 
 type User struct {
 	id        string
-	name      Name
-	email     Email
-	password  HashedPassword
-	role      Role
+	name      uservo.Name
+	email     uservo.Email
+	password  uservo.HashedPassword
+	role      uservo.Role
 	createdAt time.Time
 	updatedAt time.Time
 }
 
-func NewUser(id string, name Name, email Email, hashedPassword HashedPassword, role Role) (*User, error) {
+func NewUser(id string, name uservo.Name, email uservo.Email, hashedPassword uservo.HashedPassword, role uservo.Role) (*User, error) {
 	if id == "" {
 		return nil, ErrEmptyID
 	}
@@ -32,7 +34,7 @@ func NewUser(id string, name Name, email Email, hashedPassword HashedPassword, r
 	}, nil
 }
 
-func ReconstructUser(id string, name Name, email Email, hashedPassword HashedPassword, role Role, createdAt, updatedAt time.Time) *User {
+func ReconstructUser(id string, name uservo.Name, email uservo.Email, hashedPassword uservo.HashedPassword, role uservo.Role, createdAt, updatedAt time.Time) *User {
 	return &User{
 		id:        id,
 		name:      name,
@@ -46,11 +48,11 @@ func ReconstructUser(id string, name Name, email Email, hashedPassword HashedPas
 
 func (u *User) ID() string { return u.id }
 
-func (u *User) Name() Name { return u.name }
+func (u *User) Name() uservo.Name { return u.name }
 
-func (u *User) Email() Email { return u.email }
+func (u *User) Email() uservo.Email { return u.email }
 
-func (u *User) Role() Role { return u.role }
+func (u *User) Role() uservo.Role { return u.role }
 
 func (u *User) PasswordHash() string { return u.password.Value() }
 

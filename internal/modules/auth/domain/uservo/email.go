@@ -1,8 +1,14 @@
-package domain
+package uservo
 
 import (
+	"errors"
 	"net/mail"
 	"strings"
+)
+
+var (
+	ErrEmptyEmail   = errors.New("email cannot be empty")
+	ErrInvalidEmail = errors.New("invalid email format")
 )
 
 type Email struct {

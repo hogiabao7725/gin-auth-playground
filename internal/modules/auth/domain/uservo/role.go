@@ -1,6 +1,13 @@
-package domain
+package uservo
 
-import "strings"
+import (
+	"errors"
+	"strings"
+)
+
+var (
+	ErrInvalidRole = errors.New("invalid role")
+)
 
 // Possible values: "user", "organizer", "admin"
 type Role struct {

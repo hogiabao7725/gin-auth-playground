@@ -1,6 +1,13 @@
-package domain
+package uservo
 
-import "strings"
+import (
+	"errors"
+	"strings"
+)
+
+var (
+	ErrEmptyName = errors.New("name cannot be empty")
+)
 
 type Name struct {
 	value string

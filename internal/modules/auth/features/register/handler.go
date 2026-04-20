@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/hogiabao7725/go-ticket-engine/internal/modules/auth/domain"
+	"github.com/hogiabao7725/go-ticket-engine/internal/modules/auth/domain/uservo"
 )
 
 type Handler struct {
@@ -23,17 +24,17 @@ func NewHandler(userRepo domain.UserRepository, hasher domain.PasswordHasher, id
 }
 
 func (h *Handler) Execute(ctx context.Context, cmd Command) (*domain.User, error) {
-	email, err := domain.NewEmail(cmd.Email)
+	email, err := uservo.NewEmail(cmd.Email)
 	if err != nil {
 		return nil, err
 	}
 
-	name, err := domain.NewName(cmd.Name)
+	name, err := uservo.NewName(cmd.Name)
 	if err != nil {
 		return nil, err
 	}
 
-	plainPwd, err := domain.NewPlainPassword(cmd.Password)
+	plainPwd, err := uservo.NewPlainPassword(cmd.Password)
 	if err != nil {
 		return nil, err
 	}
@@ -43,11 +44,11 @@ func (h *Handler) Execute(ctx context.Context, cmd Command) (*domain.User, error
 		return nil, err
 	}
 
-	hashedPwd := domain.NewHashedPassword(hashStr)
+	hashedPwd := uservo.NewHashedPassword(hashStr)
 
 	userId := h.idGen.Generate()
 
-	user, err := domain.NewUser(userId, name, email, hashedPwd, domain.RoleUser)
+	user, err := domain.NewUser(userId, name, email, hashedPwd, uservo.RoleUser)
 	if err != nil {
 		return nil, err
 	}

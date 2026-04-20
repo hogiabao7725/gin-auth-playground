@@ -1,4 +1,11 @@
-package domain
+package uservo
+
+import "errors"
+
+var (
+	ErrEmptyPassword = errors.New("password cannot be empty")
+	ErrWeakPassword  = errors.New("password is too weak")
+)
 
 type PlainPassword struct {
 	value string
